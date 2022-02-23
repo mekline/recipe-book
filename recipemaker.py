@@ -1,10 +1,12 @@
+#don't forget to source .venv/bin/activate!
+
 import pandas as pd
 import numpy as np
 import re
 
 outstring = ''
-recipes = pd.read_csv('recipes.tsv', sep='\t')
-#print(recipes.head(5))
+recipes = pd.read_csv('recipes_peter_leah.tsv', sep='\t')
+print(recipes.head(5))
 
 recipes = recipes.rename(index=str, columns={"Your name": "Name",\
     "Name of your recipe": "RecipeName",\
@@ -25,7 +27,7 @@ recipes['Ordering'] = np.where(recipes["Rtype"] == 'Dessert', 5, recipes["Orderi
 recipes = recipes.fillna("")
 
 #print recipes.head(5)
-print recipes["Ordering"]
+print(recipes["Ordering"])
 
 recipes["FullText"] = '<h1>' + recipes["RecipeName"] + '</h1>' + \
 "<p><i>" + recipes["Story"] + "</i></p>" + \
