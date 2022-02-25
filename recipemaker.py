@@ -2,7 +2,7 @@
 
 import pandas as pd
 import numpy as np
-import re
+import re, os
 
 outstring = ''
 recipes = pd.read_csv('recipes_peter_leah.tsv', sep='\t')
@@ -14,20 +14,20 @@ recipes = recipes.rename(index=str, columns={"Your name": "Name",\
     "Thank you!": "Notes",\
     "What kind of recipe is this?":"Rtype"})
 
+recipes["Rtype"] = pd.Categorical(recipes["Rtype"], ["Breakfast", "Appetizer", "Soup", "Salad", "Main Dish", "Side Dish", "Dessert", ""])
+
 recipes['Ordering'] = np.where(recipes["Rtype"] == 'Breakfast', 1, recipes["Rtype"])
 recipes['Ordering'] = np.where(recipes["Rtype"] == 'Appetizer', 2, recipes["Ordering"])
 recipes['Ordering'] = np.where(recipes["Rtype"] == 'Salad', 3, recipes["Ordering"])
-recipes['Ordering'] = np.where(recipes["Rtype"] == 'Side Dish', 3, recipes["Ordering"])
 recipes['Ordering'] = np.where(recipes["Rtype"] == 'Soup', 3, recipes["Ordering"])
 recipes['Ordering'] = np.where(recipes["Rtype"] == 'Main Dish', 4, recipes["Ordering"])
-recipes['Ordering'] = np.where(recipes["Rtype"] == 'Dessert', 5, recipes["Ordering"])
-
-#recipes["Rtype"] = pd.Categorical(recipes["Rtype"], ["Breakfast", "Appetizer", "Soup", "Salad", "Main Dish", "Side Dish", "Dessert"])
+recipes['Ordering'] = np.where(recipes["Rtype"] == 'Side Dish', 5, recipes["Ordering"])
+recipes['Ordering'] = np.where(recipes["Rtype"] == 'Dessert', 6, recipes["Ordering"])
 
 recipes = recipes.fillna("")
 
-#print recipes.head(5)
-print(recipes["Ordering"])
+#New: Attempt some reformatting before concatenating text!!
+recipes["Ingredients"] = recipes["Ingredients"].replace(to_replace=r'\*', value=r'\n*', regex=True)
 
 recipes["FullText"] = '<h1>' + recipes["RecipeName"] + '</h1>' + \
 "<p><i>" + recipes["Story"] + "</i></p>" + \
@@ -38,9 +38,13 @@ recipes["FullText"] = '<h1>' + recipes["RecipeName"] + '</h1>' + \
 "<p>"+ recipes["Instructions"] + "</p><br>" + \
 "<p><i>" + recipes["Notes"] + "</i></p><p>*****</p>"
 
-recipes["FullText"] = recipes["FullText"].replace(to_replace=r'([0-9]\))', value=r'</p><p>\1', regex=True)
 
-recipes = recipes.sort("Ordering")
+recipes["FullText"] = recipes["FullText"].replace(to_replace=r'([0-9]+\))', value=r'</p><p>\1', regex=True)
+recipes["FullText"] = recipes["FullText"].replace(to_replace=r'([0-9]+\.)', value=r'</p><p>\1', regex=True)
+recipes["FullText"] = recipes["FullText"].replace(to_replace=r'\n\*', value=r'</p><p>*', regex=True)
+recipes["FullText"] = recipes["FullText"].replace(to_replace=r'\n', value=r'</p><p>', regex=True)
+
+recipes = recipes.sort_values("Ordering")
 
 recipes["FullText"].to_csv('recipetext.html', index=False)
 
