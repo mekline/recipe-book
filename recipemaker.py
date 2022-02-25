@@ -29,14 +29,14 @@ recipes = recipes.fillna("")
 #New: Attempt some reformatting before concatenating text!!
 recipes["Ingredients"] = recipes["Ingredients"].replace(to_replace=r'\*', value=r'\n*', regex=True)
 
-recipes["FullText"] = '<h1>' + recipes["RecipeName"] + '</h1>' + \
+recipes["FullText"] = '<h1 style="page-break-before: always">' + recipes["RecipeName"] + '</h1>' + \
 "<p><i>" + recipes["Story"] + "</i></p>" + \
 "<p>---"+ recipes["Name"] + "</p><br>" + \
 "<h3>Ingredients</h3>" + \
 "<p>"+ recipes["Ingredients"] + "</p><br>" + \
 "<h3>Instructions</h3>" + \
 "<p>"+ recipes["Instructions"] + "</p><br>" + \
-"<p><i>" + recipes["Notes"] + "</i></p><p>*****</p>"
+"<p><i>" + recipes["Notes"] + "</i></p>"
 
 
 recipes["FullText"] = recipes["FullText"].replace(to_replace=r'([0-9]+\))', value=r'</p><p>\1', regex=True)
@@ -46,10 +46,15 @@ recipes["FullText"] = recipes["FullText"].replace(to_replace=r'\n', value=r'</p>
 
 recipes = recipes.sort_values("Ordering")
 
-recipes["FullText"].to_csv('recipetext.html', index=False)
+recipes["FullText"].to_csv('recipetext.html', index=False, header=False) 
 
 with open('recipetext.html') as f:
 	newText=f.read().replace('"\n"', '\n')
+
+#More encoding nonsense
+newText=newText.replace('\"<h1','<h1')
+newText=newText.replace('</p>\"','</p>')
+newText=newText.replace('\"\"','\"')
 
 with open('recipetext.html', "w") as f:
   	f.write(newText)
